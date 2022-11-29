@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "270785036491",
+    "firebase_url": "https://student-management-11713-default-rtdb.firebaseio.com",
+    "project_id": "student-management-11713",
+    "storage_bucket": "student-management-11713.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:270785036491:android:7f7b6765ed4fe0b3991b4e",
+        "android_client_info": {
+          "package_name": "com.example.student_management_with_firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "270785036491-b6ni6j094gerb7f345gguob0167it5cg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB56-PHqeSbH0fPkcWaQoSQ54junxge0TQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "270785036491-b6ni6j094gerb7f345gguob0167it5cg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
