@@ -70,18 +70,18 @@ class _SignInScreenState extends State<SignInScreen> {
                 }
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'user-not-found') {
-                  // print('No user found for that email.');
+                  EasyLoading.showError("user-not-found");
                 } else if (e.code == 'wrong-password') {
-                  // print('Wrong password provided for that user.');
+                  EasyLoading.showError("wrong-password");
                 }
               }
             }),
             const SizedBox(height: 10,),
             Row(
               children:   [
-                Text(" Don't have any Account?",),
-                SizedBox(width: 5,),
-                Text("Sign Up",style: TextStyle(color: Colors.blue,fontSize: 16),).onTap((){SignUpScreen().launch(context);})
+                const Text(" Don't have any Account?",),
+                const SizedBox(width: 5,),
+                const Text("Sign Up",style: TextStyle(color: Colors.blue,fontSize: 16),).onTap((){SignUpScreen().launch(context);})
               ],
             ),
           ],
