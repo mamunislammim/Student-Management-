@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:student_management_with_firebase/screens/sign_up_screen.dart';
-import 'package:student_management_with_firebase/screens/student_data_screen.dart';
+import 'package:student_management_with_firebase/screens/student_info_list_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
@@ -16,57 +16,65 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: ListView(
-          padding: const EdgeInsets.only(top: 200,left: 20,right: 20),
+          padding: const EdgeInsets.only(top: 200, left: 20, right: 20),
           children: [
             AppTextField(
               controller: _email,
               textFieldType: TextFieldType.EMAIL,
-            decoration:   InputDecoration(
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.black.withOpacity(.4)),
-               ),
-              hintText: "email@gmail.com",
-              labelText: "Enter Email Address"
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black.withOpacity(.4)),
+                  ),
+                  hintText: "email@gmail.com",
+                  labelText: "Enter Email Address"),
             ),
+            const SizedBox(
+              height: 8,
             ),
-            const SizedBox(height: 8,),
             AppTextField(
               controller: _password,
               textFieldType: TextFieldType.PASSWORD,
-              decoration:   InputDecoration(
+              decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(color: Colors.black.withOpacity(.4)),
                   ),
                   hintText: "********",
-                  labelText: "Enter Password"
-              ),
+                  labelText: "Enter Password"),
             ),
-            const SizedBox(height: 8,),
+            const SizedBox(
+              height: 12,
+            ),
             Container(
-              padding: const EdgeInsets.only(top: 12,bottom: 12),
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
                 color: Colors.teal,
               ),
-              child: const Center(child: Text("Sign In",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 30),)),
-            ).onTap(()async{
-              try{
+              child: const Center(
+                  child: Text(
+                "Sign In",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30),
+              )),
+            ).onTap(() async {
+              try {
                 EasyLoading.show(status: "Signing In");
-                   await FirebaseAuth.instance.signInWithEmailAndPassword(
-                    email: _email.text,
-                    password: _password.text,
+                await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  email: _email.text,
+                  password: _password.text,
                 );
-                EasyLoading.showSuccess("Sign In Successful");
-                if(FirebaseAuth.instance.currentUser!.uid.isNotEmpty){
-                   StudentDataScreen().launch(context);
+                EasyLoading.showSuccess("Successful");
+                if (FirebaseAuth.instance.currentUser!.uid.isNotEmpty) {
+                  StudentInfoList().launch(context, isNewTask: true);
                 }
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'user-not-found') {
@@ -76,12 +84,23 @@ class _SignInScreenState extends State<SignInScreen> {
                 }
               }
             }),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             Row(
-              children:   [
-                const Text(" Don't have any Account?",),
-                const SizedBox(width: 5,),
-                const Text("Sign Up",style: TextStyle(color: Colors.blue,fontSize: 16),).onTap((){SignUpScreen().launch(context);})
+              children: [
+                const Text(
+                  " Don't have any Account?",
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                const Text(
+                  "Sign Up",
+                  style: TextStyle(color: Colors.blue, fontSize: 16),
+                ).onTap(() {
+                  SignUpScreen().launch(context);
+                })
               ],
             ),
           ],

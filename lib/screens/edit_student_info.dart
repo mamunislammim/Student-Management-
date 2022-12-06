@@ -1,24 +1,26 @@
-import 'dart:io';
+import 'dart:convert';
+
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:student_management_with_firebase/Models/student_model.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:student_management_with_firebase/screens/success_page.dart';
+import 'package:student_management_with_firebase/screens/student_info_list_screen.dart';
+import 'dart:io';
+import '../Models/student_model.dart';
 
-class StudentDataScreen extends StatefulWidget {
-  const StudentDataScreen({Key? key}) : super(key: key);
+class EditStudentInfo extends StatefulWidget {
+  final StudentDataModel studentData;
+  const EditStudentInfo(this.studentData, {super.key});
 
   @override
-  State<StudentDataScreen> createState() => _StudentDataScreenState();
+  State<EditStudentInfo> createState() => _EditStudentInfoState();
 }
 
-class _StudentDataScreenState extends State<StudentDataScreen> {
+class _EditStudentInfoState extends State<EditStudentInfo> {
 
   final TextEditingController _name = TextEditingController();
   final TextEditingController _fathersName = TextEditingController();
@@ -35,32 +37,54 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
   XFile? image;
   String? _imageUrl;
   final ImagePicker _picker = ImagePicker();
+  String? pictureUrl;
 
   Future<void> setImages() async {
     image = await _picker.pickImage(source: ImageSource.gallery);
+    EasyLoading.show(status: "Uploading Image");
     var snapshot = await FirebaseStorage.instance.ref("Student Image").child(DateTime.now().microsecondsSinceEpoch.toString()).putFile(File(image!.path));
     _imageUrl = await snapshot.ref.getDownloadURL();
-     setState(() {
+    EasyLoading.showSuccess("Done");
+    setState(() {
     });
+  }
+
+
+  @override
+  void initState() {
+    _name.text = widget.studentData.studentName?? "";
+    _fathersName.text = widget.studentData.fathersName ?? "";
+    _mothersName.text = widget.studentData.mothersName ?? "";
+    _rollNumber.text = widget.studentData.rollNumber ?? "";
+    _classname.text = widget.studentData.className ?? "";
+    _classGroup.text = widget.studentData.classGroup ?? "";
+    _dateOfBirth = widget.studentData.dateOfBirth ?? "";
+    _selectBloodGroup = widget.studentData.bloodGroup ?? "";
+    _selectGender = widget.studentData.gender ?? "";
+    _studentContact.text = widget.studentData.studentContact ?? "";
+    _homeContact.text = widget.studentData.familyContact ?? "";
+    _imageUrl = widget.studentData.pictureUrl ?? "";
+    pictureUrl = widget.studentData.pictureUrl ?? "";
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: const Color(0xff656867),
+        backgroundColor: const Color(0xffceedfd),
         body: ListView(
           padding: const EdgeInsets.only(left: 20, right: 20),
           children: [
 
             const Center(
                 child: Text(
-              "Student Information",
-              style: TextStyle(
-                  color: Colors.green,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold),
-            )),
+                  "Student Information",
+                  style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold),
+                )),
             const SizedBox(
               height: 20,
             ),
@@ -80,12 +104,12 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
                         ),
                         borderRadius: BorderRadius.circular(200),
                         image: image == null
-                            ? const DecorationImage(
-                                fit: BoxFit.fill, image: NetworkImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1JhsYBy43yMh9SZZ1ZFTyIAESbv-cGm64yqub3MQ&s"))
+                            ?   DecorationImage(
+                            fit: BoxFit.fill, image: NetworkImage(pictureUrl ?? ""))
                             : DecorationImage(
-                                fit: BoxFit.fill,
-                                image: FileImage(File(image!.path)),
-                              )),
+                          fit: BoxFit.fill,
+                          image: FileImage(File(image!.path)),
+                        )),
                   ),
                   Icon(Icons.camera_alt,color: Colors.black.withOpacity(.5),size: 40,).onTap((){setImages();})
                 ],
@@ -204,11 +228,11 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
               icon: const Icon(Icons.date_range),
               textAlign: TextAlign.center,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.date_range),
-                hintText: "Day : Month : Year",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),borderSide: BorderSide(color: Colors.black.withOpacity(.5)),
-                )
+                  prefixIcon: const Icon(Icons.date_range),
+                  hintText: "Day : Month : Year",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),borderSide: BorderSide(color: Colors.black.withOpacity(.5)),
+                  )
               ),
               onChanged: (val){
                 setState(() {
@@ -217,6 +241,7 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
               },
             ),
             const SizedBox(height: 5,),
+
             // Blood Group  & Gender
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -381,7 +406,7 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   Text(
-                    "Submit Data",
+                    "Update Data",
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -404,12 +429,20 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
                   studentContact: _studentContact.text,
                   familyContact: _homeContact.text);
               EasyLoading.show(status: "Updating Data");
-                await FirebaseDatabase.instance
-                  .ref("Student Info")
-                  .push()
-                  .set(model.toJson());
+
+             var edit = FirebaseDatabase.instance
+                  .ref("Student Info");
+             await edit.orderByKey().get().then((value) {
+                for(var element in value.children){
+                  var res = StudentDataModel.fromJson(jsonDecode(jsonEncode(element.value)));
+                  if(res.rollNumber == _rollNumber.text){
+                    edit.child(element.key.toString()).update(model.toJson());
+                  }
+                }
+              });
+
               await EasyLoading.showSuccess("Data Uploading Successful");
-              SuccessPage().launch(context);
+              StudentInfoList().launch(context);
             })
           ],
         ),
